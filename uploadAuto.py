@@ -7,9 +7,11 @@ import googleapiclient.errors
 import requests
 
 
+
 from googleapiclient.http import MediaFileUpload
 from google_auth_oauthlib.flow import InstalledAppFlow
 from googleapiclient.discovery import build
+from Video import Video
 
 
 
@@ -18,28 +20,35 @@ scopes = ["https://www.googleapis.com/auth/youtube.upload"]
 API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 CLIENT_SECRET = "client_secret.json"
+
+TITLE = input("Enter a title for the video.")
+CATEGORYID = input("Enter a category id.")
+STATUS = input("Enter: Private, Public, or Unlisted")
 def main():
     # Disable OAuthlib's HTTPS verification when running locally.
     # *DO NOT* leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
+
+    
+
+    vid = Video(TITLE, CATEGORYID, STATUS)
     youtube = get_authenticated_service()
     request = youtube.videos().insert(
         part="snippet,status",
         body={
          
           "snippet": {
-            "categoryId": "22",
+            "categoryId": vid.getCategoryId(),
             "description": "Description of uploaded video.",
-            "title": "Test vid."
+            "title": vid.getTitle()
             
           },
           "status": {
-            "privacyStatus": "unlisted"
+            "privacyStatus": vid.getStatus()
           }
         },
         
-        # TODO: For this request to work, you must replace "YOUR_FILE"
-        #       with a pointer to the actual file you are uploading.
+        # Pointer to video file
         media_body=MediaFileUpload("vid.mp4")
     )
     response = request.execute()
@@ -55,17 +64,14 @@ def get_authenticated_service():
     #  Check if the credentials are invalid or do not exist
     if not credentials or not credentials.valid:
         # Check if the credentials have expired
-        if credentials and credentials.expired and credentials.refresh_token:
-            credentials.refresh(Request())
-        else:
-            flow = InstalledAppFlow.from_client_secrets_file(
-                CLIENT_SECRET, scopes)
-            credentials = flow.run_console()
+        
+        flow = InstalledAppFlow.from_client_secrets_file(
+            CLIENT_SECRET, scopes)
+        credentials = flow.run_console()
 
         # Save the credentials for the next run
         with open('token.pickle', 'wb') as token:
             pickle.dump(credentials, token)
-    CRED = credentials
     
     return build(API_SERVICE_NAME, API_VERSION, credentials = credentials)
 
