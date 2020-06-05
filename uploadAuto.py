@@ -21,17 +21,15 @@ API_SERVICE_NAME = "youtube"
 API_VERSION = "v3"
 CLIENT_SECRET = "client_secret.json"
 
-TITLE = ""
-CATEGORYID = ""
-STATUS = ""
+TITLE = input("Enter a title for the video.")
+CATEGORYID = input("Enter a category id.")
+STATUS = input("Enter: Private, Public, or Unlisted")
 def main():
     # Disable OAuthlib's HTTPS verification when running locally.
     # *DO NOT* leave this option enabled in production.
     os.environ["OAUTHLIB_INSECURE_TRANSPORT"] = "1"
 
-    TITLE = input("Enter a title for the video.")
-    CATEGORYID = input("Enter a category id.")
-    STATUS = input("Enter: Private, Public, or Unlisted")
+    
 
     vid = Video(TITLE, CATEGORYID, STATUS)
     youtube = get_authenticated_service()
